@@ -2124,14 +2124,16 @@ body {
    ============================================ */
 .notification {
   position: fixed;
-  top: 60px;
-  right: 24px;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
   background: var(--bg-elevated);
   color: var(--text-primary);
   padding: 16px 20px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  z-index: 10001;
+  z-index: 999999;
   max-width: 400px;
   border: 1px solid var(--border-light);
   animation: slideInRight 0.3s ease;
@@ -2142,11 +2144,11 @@ body {
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translate(-50%, -12px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate(-50%, 0);
   }
 }
 
@@ -3812,8 +3814,10 @@ body {
         /* Notification */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            right: auto;
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 10px 15px;

@@ -109,6 +109,11 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
             // Variables pour le glissement du curseur
             let isDraggingPlayhead = false;
             
+            // === VARIABLES POUR RACCOURCIS J-K-L ===
+            let jklPlaybackSpeed = 1; // Vitesse actuelle (1x, 2x, 4x, 8x)
+            let jklDirection = 0; // -1 = arrière (J), 0 = pause (K), 1 = avant (L)
+            let jklRewindInterval = null; // Interval pour la lecture arrière
+            
             // Masquer le placeholder si la vidéo est déjà chargée
             if (videoPlayer.src) {
                 videoPlaceholder.style.display = 'none';
@@ -1116,6 +1121,133 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
             // Variable globale pour suivre l'état d'édition des notes
             let isEditingNote = false;
             
+            // ============================================
+            // FONCTIONS RACCOURCIS J-K-L (MONTAGE)
+            // ============================================
+            
+            /**
+             * Gère la touche J (lecture arrière)
+             */
+            function handleJKey() {
+                if (!videoPlayer || !videoPlayer.src) return;
+                
+                // Si on était en avant (L), réinitialiser
+                if (jklDirection === 1) {
+                    jklPlaybackSpeed = 1;
+                }
+                
+                // Si on était déjà en arrière, augmenter la vitesse
+                if (jklDirection === -1) {
+                    jklPlaybackSpeed = Math.min(jklPlaybackSpeed * 2, 8); // Max 8x
+                } else {
+                    jklPlaybackSpeed = 1; // Première pression = 1x
+                }
+                
+                jklDirection = -1;
+                startRewind();
+                updatePlaybackSpeedDisplay();
+            }
+            
+            /**
+             * Gère la touche K (pause)
+             */
+            function handleKKey() {
+                if (!videoPlayer || !videoPlayer.src) return;
+                
+                stopRewind();
+                videoPlayer.pause();
+                videoPlayer.playbackRate = 1; // Reset à vitesse normale
+                jklDirection = 0;
+                jklPlaybackSpeed = 1;
+                updatePlaybackSpeedDisplay();
+            }
+            
+            /**
+             * Gère la touche L (lecture avant)
+             */
+            function handleLKey() {
+                if (!videoPlayer || !videoPlayer.src) return;
+                
+                // Si on était en arrière (J), réinitialiser
+                if (jklDirection === -1) {
+                    stopRewind();
+                    jklPlaybackSpeed = 1;
+                }
+                
+                // Si on était déjà en avant, augmenter la vitesse
+                if (jklDirection === 1) {
+                    jklPlaybackSpeed = Math.min(jklPlaybackSpeed * 2, 8); // Max 8x
+                } else {
+                    jklPlaybackSpeed = 1; // Première pression = 1x
+                }
+                
+                jklDirection = 1;
+                startForward();
+                updatePlaybackSpeedDisplay();
+            }
+            
+            /**
+             * Démarre la lecture arrière (rewind)
+             */
+            function startRewind() {
+                stopRewind(); // Arrêter l'interval précédent si existe
+                
+                videoPlayer.pause(); // Mettre en pause le lecteur natif
+                
+                // Calculer le pas de rewind selon la vitesse
+                const rewindStep = 0.1 * jklPlaybackSpeed; // 0.1s * vitesse
+                
+                jklRewindInterval = setInterval(function() {
+                    if (videoPlayer.currentTime > 0) {
+                        videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - rewindStep);
+                    } else {
+                        handleKKey(); // Auto-pause à la fin
+                    }
+                }, 100); // Mise à jour toutes les 100ms
+            }
+            
+            /**
+             * Arrête la lecture arrière
+             */
+            function stopRewind() {
+                if (jklRewindInterval) {
+                    clearInterval(jklRewindInterval);
+                    jklRewindInterval = null;
+                }
+            }
+            
+            /**
+             * Démarre la lecture avant (forward)
+             */
+            function startForward() {
+                stopRewind(); // S'assurer qu'on n'est pas en rewind
+                
+                videoPlayer.playbackRate = jklPlaybackSpeed;
+                videoPlayer.play();
+            }
+            
+            /**
+             * Met à jour l'affichage de la vitesse dans l'interface
+             */
+            function updatePlaybackSpeedDisplay() {
+                const speedDisplay = document.querySelector('.speed-value') || document.querySelector('[data-speed]');
+                if (speedDisplay) {
+                    if (jklDirection === -1) {
+                        speedDisplay.textContent = '-' + jklPlaybackSpeed + 'x';
+                    } else if (jklDirection === 1) {
+                        speedDisplay.textContent = jklPlaybackSpeed + 'x';
+                    } else {
+                        speedDisplay.textContent = '1x';
+                    }
+                }
+                // Mettre à jour le sélecteur de vitesse si la valeur existe
+                if (speedSelector) {
+                    var opt = speedSelector.querySelector('option[value="' + jklPlaybackSpeed + '"]');
+                    if (opt) speedSelector.value = String(jklPlaybackSpeed);
+                    else if (jklDirection === 0) speedSelector.value = '1';
+                }
+            }
+            
             // Raccourcis clavier améliorés
             document.addEventListener('keydown', function(e) {
                 // Si l'élément actif est un champ de texte ou si on est en train d'éditer une note, ne pas capturer les raccourcis
@@ -1128,21 +1260,13 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                         e.preventDefault();
                         togglePlayPause();
                         break;
-                    case 'ArrowLeft':  // Flèche gauche
+                    case 'ArrowLeft':  // Flèche gauche - image précédente
                         e.preventDefault();
-                        if (e.shiftKey) {
-                            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 1); // Reculer de 1s
-                        } else {
-                            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5); // Reculer de 5s
-                        }
+                        prevFrame();
                         break;
-                    case 'ArrowRight':  // Flèche droite
+                    case 'ArrowRight':  // Flèche droite - image suivante
                         e.preventDefault();
-                        if (e.shiftKey) {
-                            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 1); // Avancer de 1s
-                        } else {
-                            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5); // Avancer de 5s
-                        }
+                        nextFrame();
                         break;
                     case ',':  // Virgule - image précédente
                         e.preventDefault();
@@ -1200,19 +1324,13 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                         videoPlayer.currentTime = videoPlayer.duration * (percent / 100);
                         showNotification(`Saut à ${percent}%`);
                         break;
-                    case 'ArrowUp':  // Flèche haut - augmenter le volume
+                    case 'ArrowUp':  // Flèche haut - avancer de 1 seconde
                         e.preventDefault();
-                        videoPlayer.volume = Math.min(1, videoPlayer.volume + 0.1);
-                        volumeSlider.value = videoPlayer.volume;
-                        updateVolumeIcon(videoPlayer.volume);
-                        showNotification(`Volume: ${Math.round(videoPlayer.volume * 100)}%`);
+                        videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 1);
                         break;
-                    case 'ArrowDown':  // Flèche bas - diminuer le volume
+                    case 'ArrowDown':  // Flèche bas - reculer de 1 seconde
                         e.preventDefault();
-                        videoPlayer.volume = Math.max(0, videoPlayer.volume - 0.1);
-                        volumeSlider.value = videoPlayer.volume;
-                        updateVolumeIcon(videoPlayer.volume);
-                        showNotification(`Volume: ${Math.round(videoPlayer.volume * 100)}%`);
+                        videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 1);
                         break;
                     case 'c':  // C pour capture de miniature
                         e.preventDefault();
@@ -1238,7 +1356,23 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                             toggleOverlayBtn.click(); // O seul pour toggle overlay
                         }
                         break;
+                    case 'j': case 'J':  // J = Lecture arrière (rewind)
+                        e.preventDefault();
+                        handleJKey();
+                        break;
+                    case 'k': case 'K':  // K = Pause
+                        e.preventDefault();
+                        handleKKey();
+                        break;
+                    case 'l': case 'L':  // L = Lecture avant (forward)
+                        e.preventDefault();
+                        handleLKey();
+                        break;
                 }
+            });
+            
+            window.addEventListener('beforeunload', function() {
+                stopRewind();
             });
             
             // Ajout du modal de prévisualisation
