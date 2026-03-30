@@ -3,17 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com; media-src 'self' blob:; connect-src https://raw.githubusercontent.com https://api.github.com;">
+    <script>
+      const now = new Date();
+      const jj = String(now.getDate()).padStart(2,'0');
+      const mm = String(now.getMonth()+1).padStart(2,'0');
+      const aa = String(now.getFullYear()).slice(-2);
+      window.APP_VERSION = 'V1.' + jj + '.' + mm + '.' + aa;
+    </script>
     <title>Reviewer — Validation vidéo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="light-theme">
+<body class="dark-theme">
+    <div id="mercury-opening">
+      <canvas id="mercury-grid"></canvas>
+      <div class="mercury-center">
+        <svg id="mercury-radar" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="130" cy="130" r="115" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"
+            stroke-dasharray="722" stroke-dashoffset="722" id="mercury-radar-circle"/>
+        </svg>
+        <video id="mercury-patch" src="assets/ambiance-reviewer.mp4" autoplay muted playsinline loop></video>
+        <span id="mercury-version"></span>
+      </div>
+    </div>
     <div id="globalDropOverlay" class="global-drop-overlay" aria-hidden="true"></div>
     <div class="app-container web-app">
         <header class="top-bar">
             <div class="top-bar-brand">
+                <img src="assets/PATCH_Reviewer.png" alt="Reviewer" class="app-patch-header">
                 <h1>REVIEWER</h1>
             </div>
             <nav class="top-bar-nav">
@@ -27,7 +47,6 @@
                     <input type="file" id="overlayInput" accept="image/png" class="input-hidden">
                     <button id="toggleOverlay" class="btn btn-secondary btn-import">OVERLAY ON/OFF</button>
                 </div>
-                <button id="themeToggle" class="btn btn-secondary btn-import theme-toggle">MODE SOMBRE</button>
             </div>
         </header>
 
@@ -175,6 +194,59 @@
         </main>
     </div>
 
+    <script>
+    (function() {
+      const opening = document.getElementById('mercury-opening');
+      const versionEl = document.getElementById('mercury-version');
+      const radarCircle = document.getElementById('mercury-radar-circle');
+      const flash = document.getElementById('mercury-flash');
+      const canvas = document.getElementById('mercury-grid');
+      const ctx = canvas.getContext('2d');
+
+      if (versionEl) versionEl.textContent = window.APP_VERSION || '';
+
+      function drawGrid() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const spacing = 28;
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        for (let x = 0; x < canvas.width; x += spacing) {
+          for (let y = 0; y < canvas.height; y += spacing) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+      drawGrid();
+
+      setTimeout(() => { opening.style.opacity = '1'; }, 180);
+      setTimeout(() => {
+        const patch = document.getElementById('mercury-patch');
+        if (patch) patch.classList.add('visible');
+      }, 550);
+
+      setTimeout(() => {
+        if (versionEl) versionEl.classList.add('visible');
+      }, 1650);
+      setTimeout(() => {
+        radarCircle.style.transition = 'stroke-dashoffset 1.5s ease';
+        radarCircle.style.strokeDashoffset = '0';
+      }, 410);
+      setTimeout(() => {
+        flash.style.opacity = '1';
+      }, 4000);
+      setTimeout(() => {
+        opening.style.display = 'none';
+        const appContainer = document.querySelector('.app-container');
+        if (appContainer) appContainer.classList.add('ready');
+        flash.style.transition = 'opacity 0.5s ease-out';
+        flash.style.opacity = '0';
+      }, 4230);
+    })();
+    </script>
     <script src="app.js"></script>
+    <div id="mercury-flash"></div>
 </body>
 </html>
