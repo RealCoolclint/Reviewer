@@ -47,7 +47,8 @@ const WebProfileSelector = (() => {
       const res = await fetch(PROFILES_URL);
       if (!res.ok) throw new Error('fetch failed');
       const data = await res.json();
-      const profiles = (data.profiles || []).filter(p => p.appPermissions && p.appPermissions[APP_KEY]);
+      const src = Array.isArray(data) ? data : (data.profiles || []);
+      const profiles = src.filter(p => p.appPermissions && p.appPermissions[APP_KEY]);
       return { online: true, profiles };
     } catch(e) {
       return { online: false, profiles: [] };
