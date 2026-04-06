@@ -4971,3 +4971,316 @@ body:not(.dark-theme) .web-app .player-section.player-block {
 .app-container.ready {
   opacity: 1;
 }
+
+/* ============================================
+   PROFILE SELECTOR — WEB SESSION
+   ============================================ */
+
+#profile-selector-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+#profile-selector-screen.active {
+  display: flex;
+}
+
+.ps-offline-badge {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: var(--warning);
+  color: #000;
+  font-family: 'Lato', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  z-index: 600;
+}
+
+.ps-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 48px;
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.ps-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ps-app-patch {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ps-app-name {
+  font-family: 'Lato', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--text-secondary);
+}
+
+.ps-title {
+  font-family: 'Lato', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-primary);
+}
+
+.ps-profiles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+.ps-profile-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px 12px;
+  background: var(--bg-tertiary);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  width: 100px;
+  transition: var(--transition);
+}
+
+.ps-profile-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.ps-profile-card.selected {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.ps-check {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 12px;
+  color: var(--accent);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.ps-profile-card.selected .ps-check {
+  opacity: 1;
+}
+
+.ps-avatar-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.ps-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ps-avatar-fallback {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lato', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.ps-hidden { display: none !important; }
+
+.dark-theme .ps-badge-admin {
+  display: inline-block;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: 'Lato', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.ps-profile-name {
+  font-family: 'Lato', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.ps-empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: 'Lato', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ps-duration-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.ps-duration-label {
+  font-family: 'Lato', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+}
+
+.ps-duration-options {
+  display: flex;
+  gap: 8px;
+}
+
+.ps-duration-option input[type="radio"] {
+  display: none;
+}
+
+.ps-duration-btn {
+  display: block;
+  padding: 6px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Lato', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.ps-duration-option input[type="radio"]:checked + .ps-duration-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.ps-duration-option:hover .ps-duration-btn {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.ps-connect-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Lato', sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #fff;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.ps-connect-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.ps-connect-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Header profil */
+.top-bar-profile {
+  align-items: center;
+  margin-right: 12px;
+}
+
+.profile-avatar-btn {
+  background: none;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar-btn:hover {
+  border-color: var(--accent);
+}
+
+.header-profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.header-profile-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lato', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+}
