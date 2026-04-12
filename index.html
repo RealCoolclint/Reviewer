@@ -285,6 +285,47 @@
       }, 4230);
     })();
     </script>
+    <!-- B1 — Modale liste commentaires -->
+    <div id="note-list-modal-overlay" class="note-list-modal-overlay" aria-hidden="true">
+      <div id="note-list-modal" class="note-list-modal" role="dialog" aria-modal="true">
+        <div class="note-list-modal-header">
+          <span class="note-list-modal-title">COMMENTAIRES</span>
+          <span class="note-list-modal-count" id="noteListModalCount"></span>
+          <div class="note-list-modal-actions">
+            <button class="btn btn-secondary btn-small" id="noteListModalExportText">EXPORTER TEXTE</button>
+            <button class="btn btn-secondary btn-small" id="noteListModalExportImages">EXPORTER AVEC IMAGES</button>
+          </div>
+          <button class="btn note-list-modal-close" id="noteListModalClose">&#10005;</button>
+        </div>
+        <div class="note-list-modal-body" id="noteListModalBody"></div>
+      </div>
+    </div>
+    <!-- B1 — Modale commentaires -->
+    <div id="note-modal-overlay" class="note-modal-overlay" aria-hidden="true">
+      <div id="note-modal" class="note-modal" role="dialog" aria-modal="true">
+        <div class="note-modal-header">
+          <div class="note-modal-nav">
+            <button class="btn note-modal-nav-btn" id="noteModalPrev">&#8592;</button>
+            <span class="note-modal-counter" id="noteModalCounter">1 / 1</span>
+            <button class="btn note-modal-nav-btn" id="noteModalNext">&#8594;</button>
+          </div>
+          <div class="note-modal-timecode" id="noteModalTimecode"></div>
+          <button class="btn note-modal-close" id="noteModalClose">&#10005;</button>
+        </div>
+        <div class="note-modal-body">
+          <img id="noteModalThumbnail" class="note-modal-thumbnail" src="" alt="" />
+          <textarea id="noteModalText" class="note-modal-textarea input" placeholder="TEXTE DE LA NOTE..."></textarea>
+          <div class="note-modal-categories" id="noteModalCategories"></div>
+        </div>
+        <div class="note-modal-footer">
+          <button class="btn btn-secondary btn-small" id="noteModalSeek">ALLER AU TIMECODE</button>
+          <div class="note-modal-footer-actions">
+            <button class="btn btn-small note-modal-delete" id="noteModalDelete">SUPPRIMER</button>
+            <button class="btn btn-primary btn-small" id="noteModalSave">ENREGISTRER</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>

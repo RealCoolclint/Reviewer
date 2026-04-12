@@ -1057,6 +1057,12 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                     
                     notesList.appendChild(noteElement);
                     
+                    // B1 — Ouvrir la modale liste au clic sur la carte
+                    noteElement.addEventListener('click', function(e) {
+                        if (e.target.closest('.delete-note') || e.target.closest('.note-category-selector')) return;
+                        openNoteListModal();
+                    });
+                    
                     // Ajouter un marqueur pour cette note
                     if (videoPlayer.duration) {
                         addNoteMarker(note);
@@ -1102,14 +1108,12 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                 
                 // Ajouter les événements pour les boutons de suppression
                 document.querySelectorAll('.delete-note').forEach(button => {
-                    button.addEventListener('click', function() {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
                         const index = parseInt(this.getAttribute('data-index'));
-                        // Demande de confirmation
-                        if (confirm('Supprimer cette note ?')) {
-                            notes.splice(index, 1);
-                            updateNotesList();
-                            showNotification('Note supprimée');
-                        }
+                        notes.splice(index, 1);
+                        updateNotesList();
+                        showNotification('NOTE SUPPRIMEE');
                     });
                 });
                 
@@ -1169,106 +1173,6 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                         // Afficher l'image dans le modal
                         document.getElementById('captureModalImage').src = note.thumbnail;
                         captureModal.classList.add('show');
-                    });
-                });
-                
-                // Ajouter les gestionnaires d'événements pour l'édition des notes
-                document.querySelectorAll('.note-text.editable').forEach(element => {
-                    element.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        const note = notes[index];
-                        const currentText = note.text;
-                        
-                        // Ne pas activer le mode édition si déjà en cours
-                        if (this.classList.contains('editing')) return;
-                        
-                        // Enregistrer le contenu actuel
-                        this.dataset.originalContent = this.innerHTML;
-                        
-                        // Supprimer tout badge existant
-                        const textOnly = currentText;
-                        
-                        // Créer l'interface d'édition
-                        this.classList.add('editing');
-                        this.innerHTML = `
-                            <textarea class="edit-input" autofocus>${textOnly}</textarea>
-                            <div class="note-edit-buttons">
-                                <button class="note-edit-cancel">Annuler</button>
-                                <button class="note-edit-save">Enregistrer</button>
-                            </div>
-                        `;
-                        
-                        // Activer le mode d'édition global pour désactiver les raccourcis clavier
-                        isEditingNote = true;
-                        
-                        // Focus sur le textarea
-                        const textarea = this.querySelector('textarea');
-                        textarea.focus();
-                        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-                        
-                        // Gestionnaire pour le bouton Sauvegarder
-                        this.querySelector('.note-edit-save').addEventListener('click', function() {
-                            const newText = textarea.value.trim();
-                            
-                            // Ne rien faire si le texte est vide
-                            if (newText === '') return;
-                            
-                            // Mettre à jour les données
-                            note.text = newText;
-                            
-                            // Désactiver le mode d'édition
-                            isEditingNote = false;
-                            
-                            // Mettre à jour l'affichage
-                            updateNotesList();
-                            
-                            showNotification('Note mise à jour');
-                        });
-                        
-                        // Gestionnaire pour le bouton Annuler
-                        this.querySelector('.note-edit-cancel').addEventListener('click', function() {
-                            // Restaurer le contenu original
-                            element.innerHTML = element.dataset.originalContent;
-                            element.classList.remove('editing');
-                            
-                            // Désactiver le mode d'édition
-                            isEditingNote = false;
-                        });
-                        
-                        // Gérer la touche Escape pour annuler
-                        textarea.addEventListener('keydown', function(e) {
-                            if (e.key === 'Escape') {
-                                element.innerHTML = element.dataset.originalContent;
-                                element.classList.remove('editing');
-                                
-                                // Désactiver le mode d'édition
-                                isEditingNote = false;
-                                
-                                e.preventDefault();
-                            } else if (e.key === 'Enter' && e.ctrlKey) {
-                                // Ctrl+Enter pour sauvegarder
-                                const newText = textarea.value.trim();
-                                if (newText !== '') {
-                                    note.text = newText;
-                                    
-                                    // Désactiver le mode d'édition
-                                    isEditingNote = false;
-                                    
-                                    updateNotesList();
-                                    showNotification('Note mise à jour');
-                                }
-                                e.preventDefault();
-                            }
-                        });
-                        
-                        // Empêcher la propagation de l'événement pour éviter de déclencher d'autres clics
-                        const stopPropagation = function(e) {
-                            e.stopPropagation();
-                        };
-                        
-                        textarea.addEventListener('click', stopPropagation);
-                        this.querySelector('.note-edit-save').addEventListener('click', stopPropagation);
-                        this.querySelector('.note-edit-cancel').addEventListener('click', stopPropagation);
                     });
                 });
             }
@@ -2627,106 +2531,6 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                 }
             }
             
-            // Ajouter les gestionnaires d'événements pour rendre les notes éditables
-            document.querySelectorAll('.note-text.editable').forEach(element => {
-                element.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const note = notes[index];
-                    const currentText = note.text;
-                    
-                    // Ne pas activer le mode édition si déjà en cours
-                    if (this.classList.contains('editing')) return;
-                    
-                    // Enregistrer le contenu actuel
-                    this.dataset.originalContent = this.innerHTML;
-                    
-                    // Supprimer tout badge existant
-                    const textOnly = currentText;
-                    
-                    // Créer l'interface d'édition
-                    this.classList.add('editing');
-                    this.innerHTML = `
-                        <textarea class="edit-input" autofocus>${textOnly}</textarea>
-                        <div class="note-edit-buttons">
-                            <button class="note-edit-cancel">Annuler</button>
-                            <button class="note-edit-save">Enregistrer</button>
-                        </div>
-                    `;
-                    
-                    // Activer le mode d'édition global pour désactiver les raccourcis clavier
-                    isEditingNote = true;
-                    
-                    // Focus sur le textarea
-                    const textarea = this.querySelector('textarea');
-                    textarea.focus();
-                    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-                    
-                    // Gestionnaire pour le bouton Sauvegarder
-                    this.querySelector('.note-edit-save').addEventListener('click', function() {
-                        const newText = textarea.value.trim();
-                        
-                        // Ne rien faire si le texte est vide
-                        if (newText === '') return;
-                        
-                        // Mettre à jour les données
-                        note.text = newText;
-                        
-                        // Désactiver le mode d'édition
-                        isEditingNote = false;
-                        
-                        // Mettre à jour l'affichage
-                        updateNotesList();
-                        
-                        showNotification('Note mise à jour');
-                    });
-                    
-                    // Gestionnaire pour le bouton Annuler
-                    this.querySelector('.note-edit-cancel').addEventListener('click', function() {
-                        // Restaurer le contenu original
-                        element.innerHTML = element.dataset.originalContent;
-                        element.classList.remove('editing');
-                        
-                        // Désactiver le mode d'édition
-                        isEditingNote = false;
-                    });
-                    
-                    // Gérer la touche Escape pour annuler
-                    textarea.addEventListener('keydown', function(e) {
-                        if (e.key === 'Escape') {
-                            element.innerHTML = element.dataset.originalContent;
-                            element.classList.remove('editing');
-                            
-                            // Désactiver le mode d'édition
-                            isEditingNote = false;
-                            
-                            e.preventDefault();
-                        } else if (e.key === 'Enter' && e.ctrlKey) {
-                            // Ctrl+Enter pour sauvegarder
-                            const newText = textarea.value.trim();
-                            if (newText !== '') {
-                                note.text = newText;
-                                
-                                // Désactiver le mode d'édition
-                                isEditingNote = false;
-                                
-                                updateNotesList();
-                                showNotification('Note mise à jour');
-                            }
-                            e.preventDefault();
-                        }
-                    });
-                    
-                    // Empêcher la propagation de l'événement pour éviter de déclencher d'autres clics
-                    const stopPropagation = function(e) {
-                        e.stopPropagation();
-                    };
-                    
-                    textarea.addEventListener('click', stopPropagation);
-                    this.querySelector('.note-edit-save').addEventListener('click', stopPropagation);
-                    this.querySelector('.note-edit-cancel').addEventListener('click', stopPropagation);
-                });
-            });
-
             // Fonctions pour gérer les nouveaux icônes SVG
             function updatePlayPauseIcon(isPlaying) {
                 const playIcon = document.querySelector('.play-icon');
@@ -2822,4 +2626,376 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                 updateVolumeIcon(videoPlayer.muted, volumeSlider.value);
                 updateFullscreenIcon(false);
             });
+
+            // ============================================================
+            // B1 — Modale liste commentaires
+            // ============================================================
+
+            function renderNoteListModal() {
+                var body = document.getElementById('noteListModalBody');
+                var countEl = document.getElementById('noteListModalCount');
+                if (!body) return;
+
+                if (countEl) countEl.textContent = notes.length + ' NOTE' + (notes.length !== 1 ? 'S' : '');
+
+                body.innerHTML = '';
+
+                if (notes.length === 0) {
+                    body.innerHTML = '<div class="note-list-modal-empty">AUCUNE NOTE</div>';
+                    return;
+                }
+
+                var listDeletePending = {};
+
+                notes.forEach(function(note, index) {
+                    var item = document.createElement('div');
+                    item.className = 'note-list-item';
+
+                    var catLabels = { montage: 'MONTAGE', edito: 'EDITO', coquille: 'COQUILLE' };
+                    var catBadge = (note.category && note.category !== 'default')
+                        ? '<span class="note-list-item-category category-' + note.category + '">' + catLabels[note.category] + '</span>'
+                        : '';
+
+                    var tcText = note.isSegment
+                        ? formatTimecodeShort(note.time) + ' — ' + formatTimecodeShort(note.outTime)
+                        : (note.timecode || formatTimecodeShort(note.time));
+                    var tcClass = note.isSegment ? 'note-list-item-timecode is-segment' : 'note-list-item-timecode';
+
+                    var thumbHtml = note.thumbnail
+                        ? '<img src="' + note.thumbnail + '" alt="" class="note-list-item-thumbnail">'
+                        : '';
+
+                    var textClass = note.text ? 'note-list-item-text' : 'note-list-item-text empty';
+                    var textContent = note.text || '(SANS TEXTE)';
+
+                    var catsHtml = ['default', 'montage', 'edito', 'coquille'].map(function(cat) {
+                        var lbl = { default: 'AUCUNE', montage: 'MONTAGE', edito: 'EDITO', coquille: 'COQUILLE' }[cat];
+                        return '<label class="category-option">'
+                            + '<input type="radio" name="listNoteCategory-' + index + '" value="' + cat + '" '
+                            + ((note.category || 'default') === cat ? 'checked' : '')
+                            + ' data-index="' + index + '">'
+                            + '<span class="category-color category-' + cat + '"></span>'
+                            + '<span class="category-label">' + lbl + '</span>'
+                            + '</label>';
+                    }).join('');
+
+                    item.innerHTML =
+                        '<div class="note-list-item-header">'
+                        + '<span class="' + tcClass + '">' + tcText + '</span>'
+                        + catBadge
+                        + '<div class="note-list-item-actions">'
+                        + '<button class="note-list-item-delete" data-index="' + index + '">&#10005;</button>'
+                        + '</div>'
+                        + '</div>'
+                        + '<div class="note-list-item-body">'
+                        + thumbHtml
+                        + '<div class="' + textClass + '">' + textContent + '</div>'
+                        + '</div>'
+                        + '<div class="note-list-item-category-selector">' + catsHtml + '</div>';
+
+                    body.appendChild(item);
+
+                    // Clic sur la carte → modale détail
+                    item.addEventListener('click', function(e) {
+                        if (e.target.closest('.note-list-item-delete') || e.target.closest('.note-list-item-category-selector')) return;
+                        openNoteModal(index);
+                    });
+
+                    // Suppression avec double confirmation
+                    var deleteBtn = item.querySelector('.note-list-item-delete');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (!listDeletePending[index]) {
+                                listDeletePending[index] = true;
+                                this.textContent = 'OK';
+                                this.classList.add('confirm-state');
+                                var self = this;
+                                setTimeout(function() {
+                                    if (listDeletePending[index]) {
+                                        listDeletePending[index] = false;
+                                        self.innerHTML = '&#10005;';
+                                        self.classList.remove('confirm-state');
+                                    }
+                                }, 3000);
+                            } else {
+                                notes.splice(index, 1);
+                                updateNotesList();
+                                renderNoteListModal();
+                                showNotification('NOTE SUPPRIMEE');
+                            }
+                        });
+                    }
+
+                    // Radios catégorie
+                    item.querySelectorAll('.note-list-item-category-selector input[type="radio"]').forEach(function(radio) {
+                        radio.addEventListener('change', function() {
+                            if (this.checked) {
+                                var idx = parseInt(this.getAttribute('data-index'));
+                                notes[idx].category = this.value;
+                                updateNotesList();
+                                renderNoteListModal();
+                            }
+                        });
+                    });
+                });
+            }
+
+            function openNoteListModal() {
+                renderNoteListModal();
+                var overlay = document.getElementById('note-list-modal-overlay');
+                if (overlay) {
+                    overlay.classList.add('active');
+                    overlay.setAttribute('aria-hidden', 'false');
+                }
+            }
+
+            function closeNoteListModal() {
+                var overlay = document.getElementById('note-list-modal-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                    overlay.setAttribute('aria-hidden', 'true');
+                }
+            }
+
+            // Bouton fermer modale liste
+            var _nlClose = document.getElementById('noteListModalClose');
+            if (_nlClose) _nlClose.addEventListener('click', closeNoteListModal);
+
+            // Clic sur l'overlay → fermer
+            var _nlOverlay = document.getElementById('note-list-modal-overlay');
+            if (_nlOverlay) _nlOverlay.addEventListener('click', function(e) {
+                if (e.target === this) closeNoteListModal();
+            });
+
+            // Boutons export dans la modale liste
+            var _nlExportText = document.getElementById('noteListModalExportText');
+            if (_nlExportText) _nlExportText.addEventListener('click', function() { exportNotes(); });
+
+            var _nlExportImages = document.getElementById('noteListModalExportImages');
+            if (_nlExportImages) _nlExportImages.addEventListener('click', function() { exportNotesWithImages(); });
+
+            // Échap ferme la modale liste (si la modale détail n'est pas ouverte)
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') return;
+                var listOverlay = document.getElementById('note-list-modal-overlay');
+                var detailOverlay = document.getElementById('note-modal-overlay');
+                if (listOverlay && listOverlay.classList.contains('active')
+                    && detailOverlay && !detailOverlay.classList.contains('active')) {
+                    closeNoteListModal();
+                    e.preventDefault();
+                }
+            });
+
+            // Triggers sidebar : titre COMMENTAIRES + zone notes-list
+            var _commentsTitle = document.querySelector('.comments-title');
+            if (_commentsTitle) {
+                _commentsTitle.style.cursor = 'pointer';
+                _commentsTitle.addEventListener('click', openNoteListModal);
+            }
+
+            var _notesList = document.getElementById('notesList');
+            if (_notesList) {
+                _notesList.addEventListener('click', function(e) {
+                    if (!e.target.closest('.note-item')) openNoteListModal();
+                });
+            }
+
+            // ============================================================
+            // B1 — Modale commentaires
+            // ============================================================
+
+            let currentModalIndex = null;
+            let modalDeleteConfirmPending = false;
+
+            function openNoteModal(index) {
+                if (index < 0 || index >= notes.length) return;
+                currentModalIndex = index;
+                modalDeleteConfirmPending = false;
+
+                const note = notes[index];
+
+                // Timecode
+                const tcEl = document.getElementById('noteModalTimecode');
+                if (tcEl) {
+                    tcEl.textContent = note.isSegment
+                        ? formatTimecodeShort(note.time) + ' — ' + formatTimecodeShort(note.outTime)
+                        : (note.timecode || formatTimecodeShort(note.time));
+                }
+
+                // Compteur
+                const counterEl = document.getElementById('noteModalCounter');
+                if (counterEl) counterEl.textContent = (index + 1) + ' / ' + notes.length;
+
+                // Miniature
+                const thumbEl = document.getElementById('noteModalThumbnail');
+                if (thumbEl) {
+                    if (note.thumbnail) {
+                        thumbEl.src = note.thumbnail;
+                        thumbEl.classList.add('visible');
+                    } else {
+                        thumbEl.src = '';
+                        thumbEl.classList.remove('visible');
+                    }
+                }
+
+                // Texte
+                const textEl = document.getElementById('noteModalText');
+                if (textEl) textEl.value = note.text || '';
+
+                // Catégories
+                const catsEl = document.getElementById('noteModalCategories');
+                if (catsEl) {
+                    const cats = [
+                        { value: 'default',  label: 'AUCUNE' },
+                        { value: 'montage',  label: 'MONTAGE' },
+                        { value: 'edito',    label: 'EDITO' },
+                        { value: 'coquille', label: 'COQUILLE' }
+                    ];
+                    catsEl.innerHTML = cats.map(cat => `
+                        <label class="category-option">
+                            <input type="radio" name="modalCategory" value="${cat.value}" ${(note.category || 'default') === cat.value ? 'checked' : ''}>
+                            <span class="category-color category-${cat.value}"></span>
+                            <span class="category-label">${cat.label}</span>
+                        </label>
+                    `).join('');
+                }
+
+                // Navigation prev/next
+                const prevBtn = document.getElementById('noteModalPrev');
+                const nextBtn = document.getElementById('noteModalNext');
+                if (prevBtn) prevBtn.disabled = (index === 0);
+                if (nextBtn) nextBtn.disabled = (index === notes.length - 1);
+
+                // Reset bouton suppression
+                const deleteBtn = document.getElementById('noteModalDelete');
+                if (deleteBtn) {
+                    deleteBtn.textContent = 'SUPPRIMER';
+                    deleteBtn.classList.remove('confirm-state');
+                }
+
+                // Afficher la modale
+                const overlay = document.getElementById('note-modal-overlay');
+                if (overlay) {
+                    overlay.classList.add('active');
+                    overlay.setAttribute('aria-hidden', 'false');
+                }
+
+                // Désactiver les raccourcis clavier globaux
+                isEditingNote = true;
+
+                // Focus textarea
+                setTimeout(function() {
+                    const t = document.getElementById('noteModalText');
+                    if (t) t.focus();
+                }, 50);
+            }
+
+            function closeNoteModal() {
+                const overlay = document.getElementById('note-modal-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                    overlay.setAttribute('aria-hidden', 'true');
+                }
+                currentModalIndex = null;
+                modalDeleteConfirmPending = false;
+                isEditingNote = false;
+
+                // Re-rendre la modale liste si elle est ouverte
+                var _listOv = document.getElementById('note-list-modal-overlay');
+                if (_listOv && _listOv.classList.contains('active')) {
+                    renderNoteListModal();
+                }
+            }
+
+            function saveModalNote() {
+                if (currentModalIndex === null || currentModalIndex >= notes.length) return;
+                const textEl = document.getElementById('noteModalText');
+                const catInput = document.querySelector('input[name="modalCategory"]:checked');
+                if (textEl) notes[currentModalIndex].text = textEl.value.trim();
+                if (catInput) notes[currentModalIndex].category = catInput.value;
+                updateNotesList();
+                showNotification('NOTE MISE A JOUR');
+                closeNoteModal();
+            }
+
+            function navigateModal(direction) {
+                if (currentModalIndex === null) return;
+                const textEl = document.getElementById('noteModalText');
+                const catInput = document.querySelector('input[name="modalCategory"]:checked');
+                if (textEl) notes[currentModalIndex].text = textEl.value.trim();
+                if (catInput) notes[currentModalIndex].category = catInput.value;
+                const newIndex = currentModalIndex + direction;
+                if (newIndex >= 0 && newIndex < notes.length) openNoteModal(newIndex);
+            }
+
+            // Bouton fermer
+            var _nmClose = document.getElementById('noteModalClose');
+            if (_nmClose) _nmClose.addEventListener('click', closeNoteModal);
+
+            // Bouton enregistrer
+            var _nmSave = document.getElementById('noteModalSave');
+            if (_nmSave) _nmSave.addEventListener('click', saveModalNote);
+
+            // Navigation prev/next
+            var _nmPrev = document.getElementById('noteModalPrev');
+            if (_nmPrev) _nmPrev.addEventListener('click', function() { navigateModal(-1); });
+
+            var _nmNext = document.getElementById('noteModalNext');
+            if (_nmNext) _nmNext.addEventListener('click', function() { navigateModal(1); });
+
+            // Bouton aller au timecode
+            var _nmSeek = document.getElementById('noteModalSeek');
+            if (_nmSeek) _nmSeek.addEventListener('click', function() {
+                if (currentModalIndex !== null && notes[currentModalIndex]) {
+                    videoPlayer.currentTime = notes[currentModalIndex].time;
+                    showNotification('TIMECODE: ' + (notes[currentModalIndex].timecode || formatTimecodeShort(notes[currentModalIndex].time)));
+                }
+            });
+
+            // Bouton supprimer — double clic de confirmation
+            var _nmDelete = document.getElementById('noteModalDelete');
+            if (_nmDelete) _nmDelete.addEventListener('click', function() {
+                if (!modalDeleteConfirmPending) {
+                    modalDeleteConfirmPending = true;
+                    this.textContent = 'CONFIRMER';
+                    this.classList.add('confirm-state');
+                    var self = this;
+                    setTimeout(function() {
+                        if (modalDeleteConfirmPending) {
+                            modalDeleteConfirmPending = false;
+                            self.textContent = 'SUPPRIMER';
+                            self.classList.remove('confirm-state');
+                        }
+                    }, 3000);
+                } else {
+                    var idx = currentModalIndex;
+                    closeNoteModal();
+                    notes.splice(idx, 1);
+                    updateNotesList();
+                    showNotification('NOTE SUPPRIMEE');
+                }
+            });
+
+            // Fermer en cliquant sur l'overlay
+            var _nmOverlay = document.getElementById('note-modal-overlay');
+            if (_nmOverlay) _nmOverlay.addEventListener('click', function(e) {
+                if (e.target === this) closeNoteModal();
+            });
+
+            // Navigation clavier dans la modale (Echap, flèches gauche/droite)
+            document.addEventListener('keydown', function(e) {
+                if (currentModalIndex === null) return;
+                if (e.key === 'Escape') {
+                    closeNoteModal();
+                    e.preventDefault();
+                } else if (e.key === 'ArrowLeft' && document.activeElement.tagName !== 'TEXTAREA') {
+                    navigateModal(-1);
+                    e.preventDefault();
+                } else if (e.key === 'ArrowRight' && document.activeElement.tagName !== 'TEXTAREA') {
+                    navigateModal(1);
+                    e.preventDefault();
+                }
+            });
+
 }); // fin initVideoAndImport (DOMContentLoaded)
