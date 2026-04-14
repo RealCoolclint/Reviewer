@@ -449,6 +449,26 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                 
                 notes = [];
                 updateNotesList();
+                
+                // Mémoire : stocker le nom du fichier + tenter une restauration
+                var _savedRaw = localStorage.getItem(REVIEWER_MEMORY_KEY);
+                localStorage.setItem(REVIEWER_MEMORY_KEY + '_filename', file.name);
+                if (_savedRaw) {
+                    try {
+                        var _saved = JSON.parse(_savedRaw);
+                        if (_saved.filename === file.name && _saved.notes && _saved.notes.length > 0) {
+                            videoPlayer.addEventListener('loadeddata', function onceRestore() {
+                                videoPlayer.removeEventListener('loadeddata', onceRestore);
+                                notes = _saved.notes;
+                                updateNotesList();
+                                if (_saved.position && _saved.position > 0) {
+                                    videoPlayer.currentTime = _saved.position;
+                                }
+                                showNotification('SESSION RESTAUREE — ' + notes.length + ' NOTE(S)');
+                            }, { once: true });
+                        }
+                    } catch(e) { /* silencieux */ }
+                }
             }
             
             // Fonction pour gérer les images PNG
@@ -458,8 +478,6 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                     const imageDataURL = e.target.result;
                     overlayImage.src = imageDataURL;
                     overlayImage.style.display = 'block';
-                    // Sauvegarder dans localStorage
-                    localStorage.setItem('reviewerDefaultOverlay', imageDataURL);
                     showNotification('OVERLAY CHARGE AVEC SUCCES');
                 };
                 reader.readAsDataURL(file);
@@ -467,13 +485,44 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
             
             // Overlay par défaut en mémoire mais masqué à l'ouverture (activation via OVERLAY ON/OFF)
             var defaultOverlayUrl = 'assets/default-overlay.png';
-            var savedOverlay = localStorage.getItem('reviewerDefaultOverlay');
-            if (savedOverlay) {
-                overlayImage.src = savedOverlay;
-            } else {
-                overlayImage.src = defaultOverlayUrl;
-            }
+            overlayImage.src = defaultOverlayUrl;
             overlayImage.style.display = 'none';
+            
+            // --- MEMOIRE DE SESSION ---
+            var REVIEWER_MEMORY_KEY = 'reviewer_memory';
+            var _lastMemorySave = 0;
+
+            function saveSession() {
+                if (!videoPlayer.src || videoPlayer.src.indexOf('blob:') < 0) return;
+                var filename = localStorage.getItem(REVIEWER_MEMORY_KEY + '_filename');
+                if (!filename) return;
+                try {
+                    var data = {
+                        filename: filename,
+                        position: videoPlayer.currentTime,
+                        notes: notes
+                    };
+                    localStorage.setItem(REVIEWER_MEMORY_KEY, JSON.stringify(data));
+                } catch(e) {
+                    try {
+                        var notesLight = notes.map(function(n) {
+                            var copy = Object.assign({}, n);
+                            delete copy.thumbnail;
+                            return copy;
+                        });
+                        localStorage.setItem(REVIEWER_MEMORY_KEY, JSON.stringify({
+                            filename: filename,
+                            position: videoPlayer.currentTime,
+                            notes: notesLight
+                        }));
+                    } catch(e2) { /* silencieux */ }
+                }
+            }
+
+            function clearSession() {
+                localStorage.removeItem(REVIEWER_MEMORY_KEY);
+                localStorage.removeItem(REVIEWER_MEMORY_KEY + '_filename');
+            }
             
             // Événements file input normaux
             videoInput.addEventListener('change', function(e) {
@@ -595,6 +644,14 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
             
             // Mise à jour de la barre de progression
             videoPlayer.addEventListener('timeupdate', updateProgress);
+            
+            videoPlayer.addEventListener('timeupdate', function() {
+                var _now = Date.now();
+                if (_now - _lastMemorySave > 5000) {
+                    _lastMemorySave = _now;
+                    saveSession();
+                }
+            });
             
             function updateProgress() {
                 const currentTime = videoPlayer.currentTime;
@@ -1601,6 +1658,7 @@ document.addEventListener('DOMContentLoaded', function initVideoAndImport() {
                 notes.push(note);
                 notes.sort(function(a, b) { return a.time - b.time; });
                 updateNotesList();
+                saveSession();
                 if (inputEl) { inputEl.value = ''; inputEl.setAttribute('placeholder', 'Ajouter une note...'); }
                 currentThumbnail = null;
                 if (typeof updateThumbnailPreview === 'function') updateThumbnailPreview();
