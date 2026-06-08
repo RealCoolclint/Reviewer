@@ -51,6 +51,10 @@
   --sidebar-text:        var(--text-primary);
   --sidebar-text-hover:  var(--text-primary);
   --sidebar-border:      var(--border);
+
+  --category-montage: #2196f3;
+  --category-edito: #f44336;
+  --category-coquille: #9c27b0;
 }
 
 .dark-theme {
@@ -225,6 +229,8 @@ body {
 
 .top-bar-brand {
   -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
 }
 
 .app-logo {
@@ -2108,10 +2114,10 @@ body {
    ============================================ */
 .notification {
   position: fixed;
-  top: 120px;
-  left: 50%;
-  transform: translateX(-50%);
-  right: auto;
+  top: 24px;
+  right: 24px;
+  left: auto;
+  transform: none;
   background: var(--bg-elevated);
   color: var(--text-primary);
   padding: 16px 20px;
@@ -4070,17 +4076,17 @@ body {
 
 .note-list-item-category.category-montage {
   background: rgba(33, 150, 243, 0.15);
-  color: #2196f3;
+  color: var(--category-montage);
 }
 
 .note-list-item-category.category-edito {
   background: rgba(244, 67, 54, 0.15);
-  color: #f44336;
+  color: var(--category-edito);
 }
 
 .note-list-item-category.category-coquille {
   background: rgba(156, 39, 176, 0.15);
-  color: #9c27b0;
+  color: var(--category-coquille);
 }
 
 .note-list-item-actions {
