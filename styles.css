@@ -101,6 +101,11 @@
 .dark-theme .empty-note {
   background-color: #1e293b !important;
 }
+
+.empty-note {
+  font-style: normal !important;
+}
+
 .dark-theme .note-item {
   border-color: rgba(255,255,255,0.1);
 }
@@ -331,6 +336,36 @@ body {
   flex-wrap: wrap;
 }
 
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.volume-slider-container {
+  display: flex;
+  align-items: center;
+}
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 3px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  outline: none;
+  cursor: pointer;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  cursor: pointer;
+}
+
 .top-bar-import .btn-import,
 .top-bar-import .btn {
   font-family: 'Lato', sans-serif;
@@ -353,6 +388,14 @@ body {
   background: var(--sidebar-bg-hover);
   border-color: var(--sidebar-border);
   color: var(--sidebar-text-hover);
+}
+
+#toggleOverlay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .input-hidden {
@@ -3503,6 +3546,15 @@ body {
   overflow-y: auto;
 }
 
+.web-app .video-placeholder {
+  color: var(--text-secondary);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
 /* ============================================
    MERCURY DESIGN — PATCH HEADER
    ============================================ */
@@ -3876,6 +3928,7 @@ body {
 
 /* Header profil */
 .top-bar-profile {
+  display: flex;
   align-items: center;
   margin-right: 12px;
 }
