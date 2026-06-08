@@ -2408,6 +2408,386 @@ body {
   image-rendering: optimize-contrast;
   background-color: #000;
 }
+
+/* ============================================
+   MIGRÉ DEPUIS LEGACY — PHASE 2
+   ============================================ */
+
+        /* Markers on progress bar */
+        .time-marker {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: yellow;
+            z-index: 2;
+        }
+        
+        /* Marqueurs de segment */
+        .segment-marker {
+            background-color: #FF5722;
+            z-index: 3;
+        }
+        
+        .segment-marker-in {
+            border-left: 1px solid white;
+        }
+        
+        .segment-marker-out {
+            border-right: 1px solid white;
+        }
+        
+        .segment-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background-color: rgba(255, 87, 34, 0.3);
+            z-index: 1;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
+        .segment-zone:hover {
+            background-color: rgba(255, 87, 34, 0.5);
+        }
+        
+        /* Bouton de lecture flottant */
+        .segment-play-float-btn {
+            position: absolute;
+            bottom: 100%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 87, 34, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .segment-play-float-btn:hover {
+            background-color: #e64a19;
+        }
+        
+        .segment-play-float-btn span {
+            font-family: monospace;
+            margin-left: 5px;
+        }
+        
+        /* Style pour le bouton de lecture dans les notes */
+        .play-segment-btn {
+            margin-left: 8px;
+            background-color: rgba(255, 87, 34, 0.8);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        
+        .play-segment-btn:hover {
+            background-color: #FF5722;
+        }
+        
+        /* Style pour l'affichage de la durée dans les notes */
+        .note-duration {
+            font-size: 11px;
+            color: #777;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .segment-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .segment-point-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .segment-btn {
+            min-width: 100px;
+            padding: 8px;
+            margin: 5px;
+            font-size: 0.9em;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .segment-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .segment-btn.active {
+            background-color: #333;
+        }
+        
+        .segment-btn.in-btn {
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .segment-btn.out-btn {
+            border-left: 3px solid #FF5722;
+        }
+        
+        .segment-btn.in-btn.active {
+            border-left: 3px solid #4CAF50;
+            background-color: rgba(76, 175, 80, 0.8);
+        }
+        
+        .segment-btn.out-btn.active {
+            border-left: 3px solid #FF5722;
+            background-color: rgba(255, 87, 34, 0.8);
+        }
+        
+        .segment-btn.attention {
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 0 rgba(255, 87, 34, 0.4);
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 87, 34, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
+            }
+        }
+        
+        .timecode-display {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+            min-width: 100px;
+            display: inline-block;
+            text-align: center;
+            flex-grow: 1;
+        }
+        
+        .timecode-display.has-value {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: #333;
+            font-weight: bold;
+        }
+        
+        /* Modification du style des notes de segment */
+        .note-item.segment-note {
+            border-left: 3px solid #FF5722;
+        }
+        
+        .note-timecode.segment-timecode {
+            background-color: rgba(255, 87, 34, 0.1);
+            color: #FF5722;
+        }
+        
+        /* Styles pour les notes éditables */
+        .note-text {
+            position: relative;
+            transition: background-color 0.2s ease;
+        }
+        
+        .note-text.editable {
+            cursor: pointer;
+        }
+        
+        .note-text.editable:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        
+        .note-text.editable:hover:after {
+            content: '✏️';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.5;
+        }
+        
+        .note-text.editing {
+            padding: 0;
+            margin: 0;
+        }
+        
+        .note-text .edit-input {
+            width: 100%;
+            padding: 8px;
+            font-size: inherit;
+            font-family: inherit;
+            border: 1px solid #2a5885;
+            border-radius: 4px;
+            box-sizing: border-box;
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .note-edit-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+        
+        .note-edit-buttons button {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        
+        .note-edit-save {
+            background-color: #2a5885;
+            color: white;
+        }
+        
+        .note-edit-save:hover {
+            background-color: #3a6ea5;
+        }
+        
+        .note-edit-cancel {
+            background-color: #f2f2f2;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .note-edit-cancel:hover {
+            background-color: #e8e8e8;
+        }
+        
+        /* Keyboard controls help panel */
+        .keyboard-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            color: white;
+            display: none;
+            z-index: 10;
+        }
+        
+        .keyboard-controls.visible {
+            display: block;
+        }
+        
+        .keyboard-controls h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .keyboard-controls ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 12px;
+        }
+        
+        .keyboard-controls li {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .key {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        /* Menu avancé */
+        .advanced-menu {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .advanced-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            user-select: none;
+            padding: 8px 12px;
+            background-color: #f5f5f5;
+            border-radius: 0;
+            font-weight: bold;
+        }
+        
+        .advanced-toggle:hover {
+            background-color: #e5e5e5;
+        }
+        
+        .advanced-toggle-icon {
+            transition: transform 0.3s ease;
+            display: inline-block;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+        
+        .advanced-toggle.active .advanced-toggle-icon {
+            transform: rotate(90deg);
+        }
+        
+        .advanced-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            opacity: 0;
+        }
+        
+        .advanced-content.visible {
+            max-height: 1000px;
+            opacity: 1;
+            transition: max-height 0.5s ease, opacity 0.3s ease 0.2s;
+        }
+        
+        .advanced-content .control-group:first-child {
+            margin-top: 0;
+        }
+        
+        /* Frame navigation control */
+        .frame-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .keyframe-info {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            flex-grow: 1;
+            text-align: center;
+        }
+
         /* Variables et styles de base */
         :root {
             --primary-color: #3a86ff;
