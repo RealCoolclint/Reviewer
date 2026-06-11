@@ -165,6 +165,18 @@ body {
   text-transform: uppercase;
 }
 
+textarea,
+input[type="text"],
+input[type="search"],
+#noteInput,
+#noteModalText,
+.note-modal-textarea,
+.note-input,
+.note-text,
+.note-list-item-text {
+  text-transform: none;
+}
+
 /* ============================================
    TITLE BAR - MINIMALISTE
    ============================================ */
@@ -3436,6 +3448,7 @@ body {
 }
 
 .player-controls-bar .progress-container {
+  position: relative;
   width: 100%;
   margin-bottom: 0;
   height: 4px;
@@ -3647,13 +3660,13 @@ body {
   font-size: 0.75em;
   font-weight: 700;
   letter-spacing: 1px;
-  text-transform: uppercase;
+  text-transform: none;
   padding: 8px 12px;
 }
 
 .web-app #noteInput::placeholder {
   color: var(--text-secondary);
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 /* Bouton CAPTURE — override legacy */
